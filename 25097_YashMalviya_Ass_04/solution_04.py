@@ -1,48 +1,110 @@
-# Day 4 Practice Assignments: Dictionaries & Exception Handling
-# Easy Assignments
-# Assignment 1: Inventory Tracker for CDAC Bookstore
-inventory = {"Python Basics": 10, "Learning AI": 5}
+# catalog = {"P01": {"price": 100.0, "stock": 5}, "P02": {"price": 50.0, "stock": 2}}
+
+# order = {"P01": 5, "P02": 10}
 
 
-def manage_bookstore_inventory(inventory, action, book_title, quantity=0):
+# def process_order(catalog, order):
+#     try:
+#         error_01 = []
 
-    if action.lower() == "add":
-        if book_title in inventory:
-            inventory[book_title] += quantity
+#         # Check whether every ordered product exists in catalog
+#         for order_id in order:
+#             if order_id not in catalog:
+#                 error_01.append(order_id)
+#                 raise ValueError(f"Product {order_id} is not in inventory.")
+#         print(f"Code is running properly: {order=}")
+#     except ValueError as e:
+#         print(error_01, e)
 
-        else:
-            inventory[book_title] = quantity
-
-    elif action.lower() == "sell":
-        if book_title in inventory:
-            if inventory[book_title] - quantity < 0:
-                print(
-                    f"Insufficient stock for '{book_title}'. Available: {inventory[book_title]}."
-                )
-            elif inventory[book_title] - quantity == 0:
-                inventory.pop(book_title)
-            else:
-                inventory[book_title] -= quantity
-        else:
-            print(f"Book '{book_title}' not found in inventory.")
-
-    elif action.lower() == "lookup":
-        ...
-    print(inventory)
+#     try:
+#         for catalog_id, catalog_detail in catalog.items():
+#             aaa = catalog_detail[catalog.keys] -= order.calues()
+            
+    
+#     except:
+#         ...
 
 
-# while True:
-#     action = input(f"Enter the action what you want to do (add, sell, lookup, exit ): ")
-#     input
-#     if action.lower() in ["add", "sell", "lookup"]:
-#         if action.lower == "lookup":
-#             print(inventory)
-#         else:
-#             book_title = input("Enter the book titel: ")
-#             quantity = int(input("Enter the numner of quantity: "))
-#             manage_bookstore_inventory(inventory, action, book_title, quantity)
-#     else:
-#         break
+# process_order(catalog, order)
+
+# ```python
+# Custom Exceptions
+
+class ProductNotFoundError(Exception):
+    pass
 
 
-# Assignment : Atomic E-Commerce Order Processor
+class OutOfStockError(Exception):
+    pass
+
+
+def process_order(catalog, order):
+
+    # ---------------- VALIDATION PHASE ----------------
+
+    # Check all products exist
+    for product_id in order:
+        if product_id not in catalog:
+            raise ProductNotFoundError(
+                f"Product '{product_id}' not found in store catalog."
+            )
+
+    # Check sufficient stock
+    for product_id, quantity in order.items():
+
+        available_stock = catalog[product_id]["stock"]
+
+        if quantity > available_stock:
+            raise OutOfStockError(
+                f"Product '{product_id}' is out of stock. "
+                f"Requested: {quantity}, Available: {available_stock}."
+            )
+
+    # ---------------- EXECUTION PHASE ----------------
+
+    total = 0.0
+
+    for product_id, quantity in order.items():
+
+        price = catalog[product_id]["price"]
+
+        # Deduct stock
+        catalog[product_id]["stock"] -= quantity
+
+        # Calculate cost
+        total += price * quantity
+
+    return total
+
+
+# ---------------- TEST ----------------
+
+catalog = {
+    "P01": {"price": 10.0, "stock": 5},
+    "P02": {"price": 20.0, "stock": 10}
+}
+
+
+# Successful order
+try:
+    total = process_order(catalog, {"P01": 2, "P02": 1})
+
+    print("Order successful!")
+    print("Total cost:", total)
+    print("Catalog:", catalog)
+
+except (ProductNotFoundError, OutOfStockError) as e:
+    print("Order failed:", e)
+
+
+# # Failed order
+# try:
+#     total = process_order(catalog, {"P01": 2, "P02": 15})
+
+# except (ProductNotFoundError, OutOfStockError) as e:
+#     print("Order failed:", e)
+
+#     # Verify rollback
+#     print("P01 stock:", catalog["P01"]["stock"])
+#     print("P02 stock:", catalog["P02"]["stock"])
+
